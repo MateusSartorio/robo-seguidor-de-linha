@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "port": "/dev/ttyS0",
+    "programmer": "avrisp",
+    "sketch": "codigo.ino"
+}
