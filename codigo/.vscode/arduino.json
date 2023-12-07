@@ -1,6 +1,7 @@
 {
-    "board": "arduino:avr:uno",
+    "board": "arduino:esp32:nano_nora",
     "port": "/dev/ttyS0",
     "programmer": "avrisp",
-    "sketch": "codigo.ino"
+    "sketch": "codigo.ino",
+    "configuration": "PartitionScheme=default,PinNumbers=default,USBMode=default"
 }
