@@ -2,14 +2,9 @@
 #include <Wire.h>
 #include <ESP32Servo.h>
 
-// Frente: 80, esquerda: 180, direita: 0
-// Pino 13
-// Ultrasom miso echo 19, entrigger 16
-// dividir o que achar por 58
-// problema no pwm do servo
-
 #define SOUND_SPEED 0.034
 
+// Canais de PWM dos motores
 #define PWM1_Ch    2
 #define PWM2_Ch    3
 #define PWM1_Res   8
@@ -33,22 +28,30 @@
 #define SCL 22
 
 // Servo
-#define PIN_SG90 13 // Output pin used
+#define PIN_SG90 13
 
 // Ultrasom
 #define MISO_ECHO 19
 #define EN_TRIG 16
 
+// Objeto usado para controlador o giroscopio
+MPU6050 mpu(Wire);
+
+// Objeto usado para controlar o servo motor
+Servo sg90;
+
+// Constantes usadas para fazer o controle PWM de velocidade dos motores
 const int BASE_VEL = 170;
 const int SLOW_VEL = 150;
 const int DELTA_VEL = 20;
 
+// Quandos os sensores IR da frente encontram um cruzamento, o robo entra no modo slow, ate que os sensores de cruzamento encontrem a linha
 bool slow = false;
 
-MPU6050 mpu(Wire);
+// Armazena o valor de tempo dede a ultima curva feita pelo robo
+// Apos o robo fazer uma curva em um cruzamento, ele conta 1000 ms ate que possa detectar outro cruzamento
+// Isso evita que o robo continue detectando que encontrou um cruzamento apos fazer uma curva
 unsigned long ultima_curva = 0;
-
-Servo sg90;
 
 void processa_cruzamento();
 void anda_reto();
@@ -63,13 +66,13 @@ void setup() {
   byte status = mpu.begin();
   Serial.print(F("MPU6050 status: "));
   Serial.println(status);
-  while(status!=0){ } // stop everything if could not connect to MPU6050
+  while(status != 0) {} // para tudo se nao conseguiu se conectar ao MPU6050
 
-  Serial.println(F("Calculating offsets, do not move MPU6050"));
+  Serial.println(F("Calculando offsets, nao mova o MPU6050"));
   delay(1000);
-  // mpu.upsideDownMounting = true; // uncomment this line if the MPU6050 is mounted upside-down
+  // mpu.upsideDownMounting = true; // descomente essa linha se o MPU6050 esta montado de cabeca para baixo
   mpu.calcOffsets(); // gyro and accelero
-  Serial.println("Done!\n");
+  Serial.println("Pronto!\n");
 
   // Sensores IR
   pinMode(CS_Sensors, OUTPUT);
@@ -83,7 +86,7 @@ void setup() {
   pinMode(SDA, INPUT);
   pinMode(SCL, INPUT);
 
-  // Motores
+  // Motores da roda
   pinMode(E_CH1, OUTPUT);
   pinMode(E_CH2, OUTPUT);
   
@@ -93,20 +96,24 @@ void setup() {
   ledcAttachPin(CHA_M2, PWM2_Ch);
   ledcSetup(PWM2_Ch, PWM1_Freq, PWM1_Res);
 
-  sg90.setPeriodHertz(50); // PWM frequency for SG90
-  sg90.attach(PIN_SG90, 500, 2400); // Minimum and maximum pulse width (in µs) to go from 0° to 180
+  // Servo motor
+  sg90.setPeriodHertz(50); // frequencia de PWM para SG90
+  sg90.attach(PIN_SG90, 500, 2400); // Minimo and maximo comprimento do pulso (em µs) para ir de 0° a 180°
 
   // Ultrasom
-  pinMode(EN_TRIG, OUTPUT); // Sets the trigPin as an Output
-  pinMode(MISO_ECHO, INPUT); // Sets the echoPin as an Input
+  pinMode(EN_TRIG, OUTPUT);
+  pinMode(MISO_ECHO, INPUT);
 
+  // Coloca o servo apontando para frente antes de comecar a mover o robo
   sg90.write(80);
 }
 
 void loop() {
   digitalWrite(CS_Sensors, HIGH);
+  
   digitalWrite(E_CH1, HIGH);
   digitalWrite(E_CH2, HIGH);
+  
   int inputL = analogRead(SL);
   int inputR = analogRead(SR);
   int inputC = analogRead(SC);
@@ -137,45 +144,51 @@ void loop() {
       pwmR = BASE_VEL - deltaR + deltaL;
     }
 
-    Serial.printf("L: %d, pwmL: %d, R: %d, pwmR: %d, slc: %d\n", inputL, pwmL, inputR, pwmR, inputSLC);
-
-    // delay(1000);
-    
-    // direito
+    // motor direito
     ledcWrite(PWM1_Ch, pwmR);
-    // ledcWrite(PWM1_Ch, 127);
 
-    // esquerdo (invertido)
+    // motor esquerdo (invertido)
     ledcWrite(PWM2_Ch, 255 - pwmL);
-    // ledcWrite(PWM2_Ch, 127);
   }
 }
 
+/**
+ * @brief toma decisoes ao encontrar cruzamento
+ * @return void 
+ */
 void processa_cruzamento() {
   float distancias[3] = { 0 };
   
-  // esquerdo (invertido)
+  // motor esquerdo (invertido)
   ledcWrite(PWM1_Ch, 127);
   ledcWrite(PWM2_Ch, 127);
 
-  // esquerda
+  // aponta sensor ultrasom para a esquerda
   sg90.write(180);
   delay(1000);
   distancias[0] = le_distancia();
-    ledcWrite(PWM1_Ch, 127);
+  ledcWrite(PWM1_Ch, 127);
   ledcWrite(PWM2_Ch, 127);
-  // meio
+  
+  // aponta sensor ultrasom para o meio
   sg90.write(80);
   delay(1000);
   distancias[1] = le_distancia();
 
-  // direita
+  // aponta sensor ultrasom para a direita
   sg90.write(0);
   delay(1000);
   distancias[2] = le_distancia();
 
-  // Serial.printf("e: %f, c: %f, d: %f\n", distancias[0], distancias[1], distancias[2]);
+  // Apos leitura, ajudar o servo motor para frente novamente
+  sg90.write(80);
+  delay(100);
 
+  // O robo vira para esquerda, frente e direita, na seguinte prioridade
+  // 1: esquerda
+  // 2: frente
+  // 3: direita
+  // 4: vira para tras (180º)
   if(distancias[0] > 20) {
     vira_esquerda();
   }
@@ -189,17 +202,26 @@ void processa_cruzamento() {
     vira_180();
   }
 
-  sg90.write(80);
   ledcWrite(PWM1_Ch, 127);
   ledcWrite(PWM2_Ch, 127);
   delay(1000);
+
+  // Armazena o valor de tempo desde que terminou de fazer a curva
   ultima_curva = millis();
 }
 
+/**
+ * @brief o robo anda reto no cruzamento
+ * @return void 
+ */
 void anda_reto() {
   return;
 }
 
+/**
+ * @brief vira o robo para direita
+ * @return void 
+ */
 void vira_direita() {
   mpu.update();
   int angulo_inicial = mpu.getAngleZ();
@@ -207,11 +229,11 @@ void vira_direita() {
   
   int delta = angulo_atual - angulo_inicial;
 
+  // Vira ate o angulo variar em -90º
   while(delta > -90) {
     mpu.update();
     angulo_atual = mpu.getAngleZ();
-    // Serial.printf("init: %d, atual: %d, delta: %d\n", angulo_inicial, angulo_atual, angulo_atual - angulo_inicial);
-    
+
     delta = angulo_atual - angulo_inicial;
     
     ledcWrite(PWM1_Ch, 255 - BASE_VEL);
@@ -219,6 +241,10 @@ void vira_direita() {
   }
 }
 
+/**
+ * @brief vira o robo para esquerda
+ * @return void 
+ */
 void vira_esquerda() {
   mpu.update();
   int angulo_inicial = mpu.getAngleZ();
@@ -226,11 +252,11 @@ void vira_esquerda() {
   
   int delta = angulo_atual - angulo_inicial;
 
+  // Vira ate o angulo variar em 90º
   while(delta < 90) {
     mpu.update();
     angulo_atual = mpu.getAngleZ();
-    // Serial.printf("init: %d, atual: %d, delta: %d\n", angulo_inicial, angulo_atual, angulo_atual - angulo_inicial);
-    
+
     delta = angulo_atual - angulo_inicial;
     
     ledcWrite(PWM1_Ch, BASE_VEL);
@@ -238,6 +264,10 @@ void vira_esquerda() {
   }
 }
 
+/**
+ * @brief vira o robo em 180º
+ * @return void 
+ */
 void vira_180() {
   mpu.update();
   int angulo_inicial = mpu.getAngleZ();
@@ -245,10 +275,10 @@ void vira_180() {
   
   int delta = angulo_atual - angulo_inicial;
 
+  // Vira ate o angulo variar em 180º
   while(delta < 180) {
     mpu.update();
     angulo_atual = mpu.getAngleZ();
-    // Serial.printf("init: %d, atual: %d, delta: %d\n", angulo_inicial, angulo_atual, angulo_atual - angulo_inicial);
     
     delta = angulo_atual - angulo_inicial;
     
@@ -257,24 +287,32 @@ void vira_180() {
   }
 }
 
+/**
+ * @brief le a distancia de objetos em relacao ao sensor ultrasom
+ * @return float
+ * @retval distancia em cm
+ */
 float le_distancia() {
   long durations[3] = { 0 };
-  
+
+  // Le o tempo de percurso da onda 3 vezes  
   for(int i = 0; i < 3; i++) {
     digitalWrite(EN_TRIG, LOW);
     delayMicroseconds(2);
-    // Sets the EN_TRIG on HIGH state for 10 micro seconds
+    // Seta o EN_TRIG em HIGH por 10 microssegundos
     digitalWrite(EN_TRIG, HIGH);
     delayMicroseconds(10);
     digitalWrite(EN_TRIG, LOW);
     
-    // Reads the echoPin, returns the sound wave travel time in microseconds
+    // Le o MISO_ECHO, returna o tempo de percurso em microssegundos
     durations[i] = pulseIn(MISO_ECHO, HIGH);
   }
 
+  // Calcula a media dos tempos
   long media = durations[0] + durations[1] + durations[2];
   media = media / 3;
 
+  // Calcula a distancia em cm a partir do tempo
   float distanceCm = media * SOUND_SPEED/2.0;
 
   return distanceCm;
