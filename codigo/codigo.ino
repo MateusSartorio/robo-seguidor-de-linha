@@ -2,6 +2,9 @@
 #include <Wire.h>
 #include <ESP32Servo.h>
 
+#define DISTANCIA_OBSTACULO 22
+#define QTD_MEDIDAS_ULTRASOM 3
+
 #define SOUND_SPEED 0.034
 
 // Canais de PWM dos motores
@@ -42,7 +45,7 @@ Servo sg90;
 
 // Constantes usadas para fazer o controle PWM de velocidade dos motores
 const int BASE_VEL = 170;
-const int SLOW_VEL = 150;
+const int SLOW_VEL = 160;
 const int DELTA_VEL = 20;
 
 // Quandos os sensores IR da frente encontram um cruzamento, o robo entra no modo slow, ate que os sensores de cruzamento encontrem a linha
@@ -189,13 +192,13 @@ void processa_cruzamento() {
   // 2: frente
   // 3: direita
   // 4: vira para tras (180º)
-  if(distancias[0] > 20) {
+  if(distancias[0] > DISTANCIA_OBSTACULO) {
     vira_esquerda();
   }
-  else if(distancias[1] > 20) {
+  else if(distancias[1] > DISTANCIA_OBSTACULO) {
     anda_reto();
   }
-  else if(distancias[2] > 20){
+  else if(distancias[2] > DISTANCIA_OBSTACULO) {
     vira_direita();
   }
   else {
@@ -293,10 +296,10 @@ void vira_180() {
  * @retval distancia em cm
  */
 float le_distancia() {
-  long durations[3] = { 0 };
+  long durations[QTD_MEDIDAS_ULTRASOM] = { 0 };
 
   // Le o tempo de percurso da onda 3 vezes  
-  for(int i = 0; i < 3; i++) {
+  for(int i = 0; i < QTD_MEDIDAS_ULTRASOM; i++) {
     digitalWrite(EN_TRIG, LOW);
     delayMicroseconds(2);
     // Seta o EN_TRIG em HIGH por 10 microssegundos
@@ -309,8 +312,12 @@ float le_distancia() {
   }
 
   // Calcula a media dos tempos
-  long media = durations[0] + durations[1] + durations[2];
-  media = media / 3;
+  long soma = 0;
+  for(int i = 0; i < QTD_MEDIDAS_ULTRASOM; i++) {
+    soma += durations[i];
+  }
+
+  double media = (double) soma / (double) QTD_MEDIDAS_ULTRASOM;
 
   // Calcula a distancia em cm a partir do tempo
   float distanceCm = media * SOUND_SPEED/2.0;
