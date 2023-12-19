@@ -1,18 +1,11 @@
 #include <MPU6050_light.h>
 #include <Wire.h>
 #include <ESP32Servo.h>
-
-// Example program
 #include <iostream>
 #include <string>
 #include <stdio.h>
-#include <limits.h>
 
-// Example program
-#include <iostream>
-#include <string>
-#include <stdio.h>
-#include <limits.h>
+#define INT_MAX 2147483647
 
 #define GRID_WIDTH 3
 #define GRID_HEIGHT 3
@@ -22,6 +15,8 @@ int j_atual = 0;
 int i_saida = GRID_WIDTH - 1;
 int j_saida = GRID_HEIGHT - 1;
 const int GRAPH_SIZE = GRID_WIDTH * GRID_HEIGHT;
+
+Stack menor_caminho;
 
 int NO_PARENT = -1;
 
@@ -55,11 +50,10 @@ public:
     {
       top++;
       arr[top] = element;
-      // std::cout << "Pushed element: " << element << " onto the stack.\n";
     }
     else
     {
-      std::cout << "Stack is full. Cannot push element " << element << ".\n";
+      Serial.printf("Stack is full. Cannot push element %d\n", element);
     }
   }
 
@@ -69,11 +63,10 @@ public:
     {
       int poppedElement = arr[top];
       top--;
-      // std::cout << "Popped element: " << poppedElement << " from the stack.\n";
     }
     else
     {
-      std::cout << "Stack is empty. Cannot pop from an empty stack.\n";
+      Serial.printf("Stack is empty. Cannot pop from an empty stack.\n");
     }
   }
 
@@ -85,13 +78,20 @@ public:
     }
     else
     {
-      std::cout << "Stack is empty.\n";
+      Serial.printf("Stack is empty.\n");
       return -1; // In this example, we consider -1 as an invalid value.
+    }
+  }
+
+  void clear()
+  {
+    while (!isEmpty)
+    {
+      pop();
     }
   }
 };
 
-int path_to_exit[GRAPH_SIZE] = {0};
 int parents[GRAPH_SIZE] = {0};
 
 // Function to print shortest path
@@ -106,35 +106,14 @@ int next_vertex(int currentVertex)
   {
     return -1;
   }
+
   return parents[currentVertex];
 }
 
-// A utility function to print
-// the constructed distances
-// array and shortest paths
-// void printSolution(int startVertex, int distances[], int destinationVertex)
-// {
-//     int nVertices = GRAPH_SIZE;
-//     std::cout << "Vertex\t Distance\tPath";
-
-//     for (int vertexIndex = 0; vertexIndex < nVertices; vertexIndex++) {
-//         if (vertexIndex != startVertex && vertexIndex == destinationVertex) {
-//             std::cout << "\n" << startVertex << " -> ";
-//             std::cout << vertexIndex << " \t\t ";
-//             std::cout << distances[vertexIndex] << "\t\t";
-//             printPath(vertexIndex);
-//         }
-//     }
-// }
-
-// Function that implements Dijkstra's
-// single source shortest path
-// algorithm for a graph represented
-// using adjacency matrix
-// representation
-
-void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], int startVertex, int destinationVertex)
+void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], Stack &menor_caminho, int startVertex, int destinationVertex)
 {
+  menor_caminho.clear();
+
   int nVertices = GRAPH_SIZE;
 
   // shortestDistances[i] will hold the
@@ -203,7 +182,12 @@ void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], int startVertex, int 
     }
   }
 
-  // printSolution(startVertex, shortestDistances, destinationVertex);
+  int proximo_vertice = index(i_saida, j_saida);
+  while (proximo_vertice != index(i_atual, j_atual))
+  {
+    menor_caminho.push(proximo_vertice);
+    proximo_vertice = parents[proximo_vertice];
+  }
 }
 
 enum orientacao
@@ -218,7 +202,8 @@ enum direcao
 {
   esquerda,
   frente,
-  direita
+  direita,
+  tras
 };
 
 orientacao orientacao_atual = norte;
@@ -254,7 +239,7 @@ int novo_i(orientacao o, direcao d, int i)
     case direita:
       return i + 1;
     default:
-      printf("deu bosta");
+      Serial.printf("Problema em algum switch\n");
     }
   case sul:
     switch (d)
@@ -266,7 +251,7 @@ int novo_i(orientacao o, direcao d, int i)
     case direita:
       return i - 1;
     default:
-      printf("deu bosta");
+      Serial.printf("Problema em algum switch\n");
     }
   case leste:
     switch (d)
@@ -278,7 +263,7 @@ int novo_i(orientacao o, direcao d, int i)
     case direita:
       return i;
     default:
-      printf("deu bosta");
+      Serial.printf("Problema em algum switch\n");
     }
   case oeste:
     switch (d)
@@ -290,10 +275,10 @@ int novo_i(orientacao o, direcao d, int i)
     case direita:
       return i;
     default:
-      printf("deu bosta");
+      Serial.printf("Problema em algum switch\n");
     }
   default:
-    printf("deu bosta\n");
+    Serial.printf("Problema em algum switch\n");
   }
 }
 
@@ -311,7 +296,7 @@ int novo_j(orientacao o, direcao d, int j)
     case direita:
       return j;
     default:
-      printf("deu bosta");
+      Serial.printf("Problema em algum switch\n");
     }
   case sul:
     switch (d)
@@ -323,7 +308,7 @@ int novo_j(orientacao o, direcao d, int j)
     case direita:
       return j;
     default:
-      printf("deu bosta");
+      Serial.printf("Problema em algum switch\n");
     }
   case leste:
     switch (d)
@@ -335,7 +320,7 @@ int novo_j(orientacao o, direcao d, int j)
     case direita:
       return j - 1;
     default:
-      printf("deu bosta");
+      Serial.printf("Problema em algum switch\n");
     }
   case oeste:
     switch (d)
@@ -347,531 +332,225 @@ int novo_j(orientacao o, direcao d, int j)
     case direita:
       return j + 1;
     default:
-      printf("deu bosta");
+      Serial.printf("Problema em algum switch\n");
     }
   default:
-    printf("deu bosta\n");
+    Serial.printf("Problema em algum switch\n");
   }
 }
 
-orientacao nova_orientacao(direcao d)
+int obtem_vertice_a_esquerda()
 {
   switch (orientacao_atual)
   {
   case norte:
-    switch (d)
+    if (i_atual > 0)
     {
-    case esquerda:
-      return oeste;
-    case frente:
-      return norte;
-    case direita:
-      return leste;
-    default:
-      printf("deu bosta");
+      return index(i_atual - 1, j);
+    }
+    else
+    {
+      return -1;
     }
   case sul:
-    switch (d)
+    if (i_atual < GRID_WIDTH - 1)
     {
-    case esquerda:
-      return leste;
-    case frente:
-      return sul;
-    case direita:
-      return oeste;
-    default:
-      printf("deu bosta");
+      return index(i_atual + 1, j);
+    }
+    else
+    {
+      return -1;
     }
   case leste:
-    switch (d)
+    if (j_atual < GRID_HEIGHT - 1)
     {
-    case esquerda:
-      return norte;
-    case frente:
-      return leste;
-    case direita:
-      return sul;
-    default:
-      printf("deu bosta");
+      return index(i_atual, j_atual + 1);
+    }
+    else
+    {
+      return -1;
     }
   case oeste:
-    switch (d)
+    if (j_atual > 0)
     {
-    case esquerda:
-      return sul;
-    case frente:
-      return oeste;
-    case direita:
-      return norte;
-    default:
-      printf("deu bosta");
+      return index(i_atual, j_atual - 1);
+    }
+    else
+    {
+      return -1;
     }
   default:
-    printf("deu bosta\n");
+    Serial.printf("Problema em algum switch\n");
   }
 }
 
-int main()
-{
-  for (int k = 0; k < GRAPH_SIZE; k++)
-  {
-    int i = get_i(k);
-    int j = get_j(k);
-
-    if (i > 0)
-    {
-      graph[k][index(i - 1, j)] = 1;
-    }
-    else
-    {
-      graph[k][index(i - 1, j)] = 0;
-    }
-
-    if (i < GRID_WIDTH - 1)
-    {
-      graph[k][index(i + 1, j)] = 1;
-    }
-    else
-    {
-      graph[k][index(i + 1, j)] = 0;
-    }
-
-    if (j > 0)
-    {
-      graph[k][index(i, j - 1)] = 1;
-    }
-    else
-    {
-      graph[k][index(i, j - 1)] = 0;
-    }
-
-    if (j < GRID_HEIGHT - 1)
-    {
-      graph[k][index(i, j + 1)] = 1;
-    }
-    else
-    {
-      graph[k][index(i, j + 1)] = 0;
-    }
-  }
-
-  for (int i = 0; i < GRAPH_SIZE; i++)
-  {
-    for (int j = 0; j < GRAPH_SIZE; j++)
-    {
-      if (graph[i][j] == 1)
-      {
-        printf("(%d, %d)\n", i, j);
-      }
-    }
-  }
-
-  // graph[0][1] = 1;
-  // graph[1][0] = 1;
-  // graph[0][3] = 1;
-  // graph[3][0] = 1;
-  // graph[3][4] = 1;
-  // graph[4][3] = 1;
-  // graph[1][2] = 1;
-  // graph[2][1] = 1;
-  // graph[2][5] = 1;
-  // graph[5][2] = 1;
-  // graph[5][8] = 1;
-  // graph[8][5] = 1;
-
-  int entrada = 0;
-  while (1)
-  {
-    printf("posicao: (%d, %d), orientacao: ", i_atual, j_atual);
-
-    switch (orientacao_atual)
-    {
-    case norte:
-      printf("norte\n");
-      break;
-    case sul:
-      printf("sul\n");
-      break;
-    case leste:
-      printf("leste\n");
-      break;
-    case oeste:
-      printf("oeste\n");
-      break;
-    default:
-      printf("deu bosta\n");
-      break;
-    }
-
-    dijkstra(graph, index(i_atual, j_atual), GRAPH_SIZE - 1);
-
-    Stack s;
-
-    int proximo_vertice = GRAPH_SIZE - 1;
-    while (proximo_vertice != NO_PARENT)
-    {
-      s.push(proximo_vertice);
-      proximo_vertice = parents[proximo_vertice];
-    }
-
-    while (!s.isEmpty())
-    {
-      std::cout << s.topElement() << ", ";
-      s.pop();
-    }
-    std::cout << "\n";
-
-    printf("deseja virar para onde [0: esquerda, 1: frente, 2: direita]: ");
-    std::cin >> entrada;
-
-    direcao direcao_da_curva;
-    switch (entrada)
-    {
-    case 0:
-      direcao_da_curva = esquerda;
-      break;
-    case 1:
-      direcao_da_curva = frente;
-      break;
-    case 2:
-      direcao_da_curva = direita;
-      break;
-    default:
-      printf("deu bosta\n");
-      direcao_da_curva = frente;
-      break;
-    }
-
-    i_atual = novo_i(orientacao_atual, direcao_da_curva, i_atual);
-    j_atual = novo_j(orientacao_atual, direcao_da_curva, j_atual);
-    orientacao_atual = nova_orientacao(direcao_da_curva);
-  }
-}
-
-enum orientacao
-{
-  norte,
-  sul,
-  leste,
-  oeste
-};
-
-enum direcao
-{
-  esquerda,
-  frente,
-  direita
-};
-
-orientacao orientacao_atual = norte;
-
-int graph[GRAPH_SIZE][GRAPH_SIZE];
-
-int get_i(int n)
-{
-  return n % GRID_WIDTH;
-}
-
-int get_j(int n)
-{
-  return n / GRID_WIDTH;
-}
-
-int index(int i, int j)
-{
-  return j * GRID_WIDTH + i;
-}
-
-int novo_i(orientacao o, direcao d, int i)
-{
-  switch (o)
-  {
-  case norte:
-    switch (d)
-    {
-    case esquerda:
-      return i - 1;
-    case frente:
-      return i;
-    case direita:
-      return i + 1;
-    default:
-      printf("deu bosta");
-    }
-  case sul:
-    switch (d)
-    {
-    case esquerda:
-      return i + 1;
-    case frente:
-      return i;
-    case direita:
-      return i - 1;
-    default:
-      printf("deu bosta");
-    }
-  case leste:
-    switch (d)
-    {
-    case esquerda:
-      return i;
-    case frente:
-      return i + 1;
-    case direita:
-      return i;
-    default:
-      printf("deu bosta");
-    }
-  case oeste:
-    switch (d)
-    {
-    case esquerda:
-      return i;
-    case frente:
-      return i - 1;
-    case direita:
-      return i;
-    default:
-      printf("deu bosta");
-    }
-  default:
-    printf("deu bosta\n");
-  }
-}
-
-int novo_j(orientacao o, direcao d, int j)
-{
-  switch (o)
-  {
-  case norte:
-    switch (d)
-    {
-    case esquerda:
-      return j;
-    case frente:
-      return j + 1;
-    case direita:
-      return j;
-    default:
-      printf("deu bosta");
-    }
-  case sul:
-    switch (d)
-    {
-    case esquerda:
-      return j;
-    case frente:
-      return j - 1;
-    case direita:
-      return j;
-    default:
-      printf("deu bosta");
-    }
-  case leste:
-    switch (d)
-    {
-    case esquerda:
-      return j + 1;
-    case frente:
-      return j;
-    case direita:
-      return j - 1;
-    default:
-      printf("deu bosta");
-    }
-  case oeste:
-    switch (d)
-    {
-    case esquerda:
-      return j - 1;
-    case frente:
-      return j;
-    case direita:
-      return j + 1;
-    default:
-      printf("deu bosta");
-    }
-  default:
-    printf("deu bosta\n");
-  }
-}
-
-orientacao nova_orientacao(direcao d)
+int obtem_vertice_em_frente()
 {
   switch (orientacao_atual)
   {
   case norte:
-    switch (d)
+    if (j_atual < GRID_HEIGHT - 1)
     {
-    case esquerda:
-      return oeste;
-    case frente:
-      return norte;
-    case direita:
-      return leste;
-    default:
-      printf("deu bosta");
+      return index(i_atual, j + 1);
+    }
+    else
+    {
+      return -1;
     }
   case sul:
-    switch (d)
+    if (j_atual > 0)
     {
-    case esquerda:
-      return leste;
-    case frente:
-      return sul;
-    case direita:
-      return oeste;
-    default:
-      printf("deu bosta");
+      return index(i_atual, j - 1);
+    }
+    else
+    {
+      return -1;
     }
   case leste:
-    switch (d)
+    if (i_atual < GRID_WIDTH - 1)
     {
-    case esquerda:
-      return norte;
-    case frente:
-      return leste;
-    case direita:
-      return sul;
-    default:
-      printf("deu bosta");
+      return index(i_atual + 1, j_atual);
+    }
+    else
+    {
+      return -1;
     }
   case oeste:
-    switch (d)
+    if (i_atual > 0)
     {
-    case esquerda:
-      return sul;
-    case frente:
-      return oeste;
-    case direita:
-      return norte;
-    default:
-      printf("deu bosta");
+      return index(i_atual - 1, j_atual);
+    }
+    else
+    {
+      return -1;
     }
   default:
-    printf("deu bosta\n");
+    Serial.printf("Problema em algum switch\n");
   }
 }
 
-int main()
+int obtem_vertice_a_direita()
 {
-  for (int k = 0; k < GRAPH_SIZE; k++)
+  switch (orientacao_atual)
   {
-    int i = get_i(k);
-    int j = get_j(k);
-
-    if (i > 0)
+  case norte:
+    if (i_atual < GRID_HEIGHT - 1)
     {
-      graph[k][index(i - 1, j)] = 1;
+      return index(i_atual + 1, j);
     }
     else
     {
-      graph[k][index(i - 1, j)] = 0;
+      return -1;
     }
-
-    if (i < GRID_WIDTH - 1)
+  case sul:
+    if (i_atual > 0)
     {
-      graph[k][index(i + 1, j)] = 1;
+      return index(i_atual - 1, j);
     }
     else
     {
-      graph[k][index(i + 1, j)] = 0;
+      return -1;
     }
-
-    if (j > 0)
+  case leste:
+    if (j_atual < GRID_HEIGHT - 1)
     {
-      graph[k][index(i, j - 1)] = 1;
+      return index(i_atual, j_atual - 1);
     }
     else
     {
-      graph[k][index(i, j - 1)] = 0;
+      return -1;
     }
-
-    if (j < GRID_HEIGHT - 1)
+  case oeste:
+    if (j_atual > 0)
     {
-      graph[k][index(i, j + 1)] = 1;
+      return index(i_atual, j_atual + 1);
     }
     else
     {
-      graph[k][index(i, j + 1)] = 0;
+      return -1;
     }
+  default:
+    Serial.printf("Problema em algum switch\n");
   }
+}
 
-  for (int i = 0; i < GRAPH_SIZE; i++)
+direcao obtem_direcao_de_curva(int proximo_vertice_a_andar)
+{
+  int i_proximo_vertice = get_i(proximo_vertice_a_andar);
+  int j_proximo_vertice = get_j(proximo_vertice_a_andar);
+
+  switch (orientacao_atual)
   {
-    for (int j = 0; j < GRAPH_SIZE; j++)
+  case norte:
+    if (i_proximo_vertice > i_atual)
     {
-      if (graph[i][j] == 1)
-      {
-        printf("(%d, %d)\n", i, j);
-      }
+      return direita;
     }
-  }
-
-  graph[0][1] = 1;
-  graph[1][0] = 1;
-  // graph[0][3] = 1;
-  // graph[3][0] = 1;
-  // graph[3][4] = 1;
-  // graph[4][3] = 1;
-  // graph[1][2] = 1;
-  // graph[2][1] = 1;
-  // graph[2][5] = 1;
-  // graph[5][2] = 1;
-  // graph[5][8] = 1;
-  // graph[8][5] = 1;
-
-  int entrada = 0;
-  while (1)
-  {
-    printf("posicao: (%d, %d), orientacao: ", i_atual, j_atual);
-
-    switch (orientacao_atual)
+    else if (i_proximo_vertice < i_atual)
     {
-    case norte:
-      printf("norte\n");
-      break;
-    case sul:
-      printf("sul\n");
-      break;
-    case leste:
-      printf("leste\n");
-      break;
-    case oeste:
-      printf("oeste\n");
-      break;
-    default:
-      printf("deu bosta\n");
-      break;
+      return esquerda;
     }
-
-    dijkstra(graph, index(i_atual, j_atual));
-    std::cout << "\n";
-
-    printf("deseja virar para onde [0: esquerda, 1: frente, 2: direita]: ");
-    std::cin >> entrada;
-
-    direcao direcao_da_curva;
-    switch (entrada)
+    else if (j_proximo_vertice > j_atual)
     {
-    case 0:
-      direcao_da_curva = esquerda;
-      break;
-    case 1:
-      direcao_da_curva = frente;
-      break;
-    case 2:
-      direcao_da_curva = direita;
-      break;
-    default:
-      printf("deu bosta\n");
-      direcao_da_curva = frente;
-      break;
+      return frente;
     }
-
-    i_atual = novo_i(orientacao_atual, direcao_da_curva, i_atual);
-    j_atual = novo_j(orientacao_atual, direcao_da_curva, j_atual);
-    orientacao_atual = nova_orientacao(direcao_da_curva);
+    else
+    {
+      return tras;
+    }
+  case sul:
+    if (i_proximo_vertice > i_atual)
+    {
+      return esquerda;
+    }
+    else if (i_proximo_vertice < i_atual)
+    {
+      return direita;
+    }
+    else if (j_proximo_vertice > j_atual)
+    {
+      return tras;
+    }
+    else
+    {
+      return frente;
+    }
+  case leste:
+    if (i_proximo_vertice > i_atual)
+    {
+      return frente;
+    }
+    else if (i_proximo_vertice < i_atual)
+    {
+      return tras;
+    }
+    else if (j_proximo_vertice > j_atual)
+    {
+      return esquerda;
+    }
+    else
+    {
+      return direita;
+    }
+  case oeste:
+    if (i_proximo_vertice > i_atual)
+    {
+      return tras;
+    }
+    else if (i_proximo_vertice < i_atual)
+    {
+      return frente;
+    }
+    else if (j_proximo_vertice > j_atual)
+    {
+      return direita;
+    }
+    else
+    {
+      return esquerda;
+    }
+  default:
+    Serial.printf("Problema em algum switch\n");
   }
 }
 
@@ -915,9 +594,8 @@ MPU6050 mpu(Wire);
 
 // Objeto usado para controlar o servo motor
 Servo sg90;
-grid_width
-    // Constantes usadas para fazer o controle PWM de velocidade dos motores
-    const int BASE_VEL = 170;
+// Constantes usadas para fazer o controle PWM de velocidade dos motores
+const int BASE_VEL = 170;
 const int SLOW_VEL = 160;
 const int DELTA_VEL = 20;
 
@@ -985,6 +663,48 @@ void setup()
 
   // Coloca o servo apontando para frente antes de comecar a mover o robo
   sg90.write(80);
+
+  for (int k = 0; k < GRAPH_SIZE; k++)
+  {
+    int i = get_i(k);
+    int j = get_j(k);
+
+    if (i > 0)
+    {
+      graph[k][index(i - 1, j)] = 1;
+    }
+    else
+    {
+      graph[k][index(i - 1, j)] = 0;
+    }
+
+    if (i < GRID_WIDTH - 1)
+    {
+      graph[k][index(i + 1, j)] = 1;
+    }
+    else
+    {
+      graph[k][index(i + 1, j)] = 0;
+    }
+
+    if (j > 0)
+    {
+      graph[k][index(i, j - 1)] = 1;
+    }
+    else
+    {
+      graph[k][index(i, j - 1)] = 0;
+    }
+
+    if (j < GRID_HEIGHT - 1)
+    {
+      graph[k][index(i, j + 1)] = 1;
+    }
+    else
+    {
+      graph[k][index(i, j + 1)] = 0;
+    }
+  }
 }
 
 void loop()
@@ -1070,26 +790,66 @@ void processa_cruzamento()
   sg90.write(80);
   delay(100);
 
-  // O robo vira para esquerda, frente e direita, na seguinte prioridade
-  // 1: esquerda
-  // 2: frente
-  // 3: direita
-  // 4: vira para tras (180º)
+  bool caminho_alterado = false;
   if (distancias[0] > DISTANCIA_OBSTACULO)
   {
+    caminho_alterado = true;
+    int vertice_a_esquerda = obtem_vertice_a_esquerda;
+    if (vertice_a_esquerda != -1)
+    {
+      graph[index(i_atual, j_atual), vertice_a_esquerda] = 0;
+      graph[vertice_a_esquerda, index(i_atual, j_atual)] = 0;
+    }
+  }
+
+  if (distancias[1] > DISTANCIA_OBSTACULO)
+  {
+    caminho_alterado = true;
+    int vertice_em_frente = obtem_vertice_em_frente;
+    if (vertice_em_frente != -1)
+    {
+      graph[index(i_atual, j_atual), vertice_em_frente] = 0;
+      graph[vertice_em_frente, index(i_atual, j_atual)] = 0;
+    }
+  }
+
+  if (distancias[2] > DISTANCIA_OBSTACULO)
+  {
+    caminho_alterado = true;
+    int vertice_a_direita = obtem_vertice_a_direita;
+    if (vertice_a_direita != -1)
+    {
+      graph[index(i_atual, j_atual), vertice_a_direita] = 0;
+      graph[vertice_a_direita, index(i_atual, j_atual)] = 0;
+    }
+  }
+
+  if (caminho_alterado)
+  {
+    dijkstra(graph, menor_caminho, index(i_atual, j_atual), index(i_saida, j_saida));
+  }
+
+  int proximo_vertice_a_andar = menor_caminho.topElement();
+  menor_caminho.pop();
+
+  direcao direcao_da_curva = obtem_direcao_de_curva(proximo_vertice_a_andar);
+
+  switch (direcao_da_curva)
+  {
+  case esquerda:
     vira_esquerda();
-  }
-  else if (distancias[1] > DISTANCIA_OBSTACULO)
-  {
+    break;
+  case frente:
     anda_reto();
-  }
-  else if (distancias[2] > DISTANCIA_OBSTACULO)
-  {
+    break;
+  case direita:
     vira_direita();
-  }
-  else
-  {
+    break;
+  case tras:
     vira_180();
+    break;
+  default:
+    Serial.printf("Problema em algum switch\n");
   }
 
   ledcWrite(PWM1_Ch, 127);
