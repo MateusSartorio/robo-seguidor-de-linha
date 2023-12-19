@@ -8,6 +8,12 @@
 #include <stdio.h>
 #include <limits.h>
 
+// Example program
+#include <iostream>
+#include <string>
+#include <stdio.h>
+#include <limits.h>
+
 #define GRID_WIDTH 3
 #define GRID_HEIGHT 3
 
@@ -19,44 +25,107 @@ const int GRAPH_SIZE = GRID_WIDTH * GRID_HEIGHT;
 
 int NO_PARENT = -1;
 
+const int STACK_MAX_SIZE = GRAPH_SIZE; // Maximum size of the stack
+
+class Stack
+{
+private:
+  int arr[STACK_MAX_SIZE];
+  int top;
+
+public:
+  Stack()
+  {
+    top = -1;
+  } // Initialize top to -1 to indicate an empty stack
+
+  bool isEmpty()
+  {
+    return (top == -1);
+  }
+
+  bool isFull()
+  {
+    return (top == STACK_MAX_SIZE - 1);
+  }
+
+  void push(int element)
+  {
+    if (!isFull())
+    {
+      top++;
+      arr[top] = element;
+      // std::cout << "Pushed element: " << element << " onto the stack.\n";
+    }
+    else
+    {
+      std::cout << "Stack is full. Cannot push element " << element << ".\n";
+    }
+  }
+
+  void pop()
+  {
+    if (!isEmpty())
+    {
+      int poppedElement = arr[top];
+      top--;
+      // std::cout << "Popped element: " << poppedElement << " from the stack.\n";
+    }
+    else
+    {
+      std::cout << "Stack is empty. Cannot pop from an empty stack.\n";
+    }
+  }
+
+  int topElement()
+  {
+    if (!isEmpty())
+    {
+      return arr[top];
+    }
+    else
+    {
+      std::cout << "Stack is empty.\n";
+      return -1; // In this example, we consider -1 as an invalid value.
+    }
+  }
+};
+
+int path_to_exit[GRAPH_SIZE] = {0};
+int parents[GRAPH_SIZE] = {0};
+
 // Function to print shortest path
 // from source to currentVertex
 // using parents array
-void printPath(int currentVertex, int parents[])
+int next_vertex(int currentVertex)
 {
 
   // Base case : Source node has
   // been processed
   if (currentVertex == NO_PARENT)
   {
-    return;
+    return -1;
   }
-  printPath(parents[currentVertex], parents);
-  std::cout << currentVertex << " ";
+  return parents[currentVertex];
 }
 
 // A utility function to print
 // the constructed distances
 // array and shortest paths
-void printSolution(int startVertex, int distances[],
-                   int parents[])
-{
-  int nVertices = GRAPH_SIZE;
-  std::cout << "Vertex\t Distance\tPath";
+// void printSolution(int startVertex, int distances[], int destinationVertex)
+// {
+//     int nVertices = GRAPH_SIZE;
+//     std::cout << "Vertex\t Distance\tPath";
 
-  for (int vertexIndex = 0; vertexIndex < nVertices;
-       vertexIndex++)
-  {
-    if (vertexIndex != startVertex)
-    {
-      std::cout << "\n"
-                << startVertex << " -> ";
-      std::cout << vertexIndex << " \t\t ";
-      std::cout << distances[vertexIndex] << "\t\t";
-      printPath(vertexIndex, parents);
-    }
-  }
-}
+//     for (int vertexIndex = 0; vertexIndex < nVertices; vertexIndex++) {
+//         if (vertexIndex != startVertex && vertexIndex == destinationVertex) {
+//             std::cout << "\n" << startVertex << " -> ";
+//             std::cout << vertexIndex << " \t\t ";
+//             std::cout << distances[vertexIndex] << "\t\t";
+//             printPath(vertexIndex);
+//         }
+//     }
+// }
 
 // Function that implements Dijkstra's
 // single source shortest path
@@ -64,7 +133,7 @@ void printSolution(int startVertex, int distances[],
 // using adjacency matrix
 // representation
 
-void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], int startVertex)
+void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], int startVertex, int destinationVertex)
 {
   int nVertices = GRAPH_SIZE;
 
@@ -90,10 +159,6 @@ void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], int startVertex)
   // itself is always 0
   shortestDistances[startVertex] = 0;
 
-  // Parent array to store shortest
-  // path tree
-  int parents[nVertices];
-
   // The starting vertex does not
   // have a parent
   parents[startVertex] = NO_PARENT;
@@ -110,8 +175,7 @@ void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], int startVertex)
     // first iteration.
     int nearestVertex = -1;
     int shortestDistance = INT_MAX;
-    for (int vertexIndex = 0; vertexIndex < nVertices;
-         vertexIndex++)
+    for (int vertexIndex = 0; vertexIndex < nVertices; vertexIndex++)
     {
       if (!added[vertexIndex] && shortestDistances[vertexIndex] < shortestDistance)
       {
@@ -127,13 +191,11 @@ void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], int startVertex)
     // Update dist value of the
     // adjacent vertices of the
     // picked vertex.
-    for (int vertexIndex = 0; vertexIndex < nVertices;
-         vertexIndex++)
+    for (int vertexIndex = 0; vertexIndex < nVertices; vertexIndex++)
     {
-      int edgeDistance = adjacencyMatrix[nearestVertex]
-                                        [vertexIndex];
+      int edgeDistance = adjacencyMatrix[nearestVertex][vertexIndex];
 
-      if (edgeDistance > 0 && ((shortestDistance + edgeDistance) < shortestDistances[vertexIndex]))
+      if (edgeDistance > 0 && ((shortestDistance + edgeDistance) < shortestDistances[vertexIndex]) && (shortestDistance + edgeDistance >= 0))
       {
         parents[vertexIndex] = nearestVertex;
         shortestDistances[vertexIndex] = shortestDistance + edgeDistance;
@@ -141,7 +203,7 @@ void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], int startVertex)
     }
   }
 
-  printSolution(startVertex, shortestDistances, parents);
+  // printSolution(startVertex, shortestDistances, destinationVertex);
 }
 
 enum orientacao
@@ -393,26 +455,371 @@ int main()
     }
   }
 
-  // for(int i = 0; i < GRAPH_SIZE; i++) {
-  //     for(int j = 0; j < GRAPH_SIZE; j++) {
-  //         if(graph[i][j] == 1) {
-  //             printf("(%d, %d)\n", i, j);
-  //         }
-  //     }
-  // }
+  for (int i = 0; i < GRAPH_SIZE; i++)
+  {
+    for (int j = 0; j < GRAPH_SIZE; j++)
+    {
+      if (graph[i][j] == 1)
+      {
+        printf("(%d, %d)\n", i, j);
+      }
+    }
+  }
 
-  graph[1][4] = 0;
-  graph[4][1] = 0;
-  graph[4][5] = 0;
-  graph[5][4] = 0;
-  graph[3][6] = 0;
-  graph[6][3] = 0;
-  graph[6][7] = 0;
-  graph[7][6] = 0;
-  graph[4][7] = 0;
-  graph[7][4] = 0;
-  graph[7][8] = 0;
-  graph[8][7] = 0;
+  // graph[0][1] = 1;
+  // graph[1][0] = 1;
+  // graph[0][3] = 1;
+  // graph[3][0] = 1;
+  // graph[3][4] = 1;
+  // graph[4][3] = 1;
+  // graph[1][2] = 1;
+  // graph[2][1] = 1;
+  // graph[2][5] = 1;
+  // graph[5][2] = 1;
+  // graph[5][8] = 1;
+  // graph[8][5] = 1;
+
+  int entrada = 0;
+  while (1)
+  {
+    printf("posicao: (%d, %d), orientacao: ", i_atual, j_atual);
+
+    switch (orientacao_atual)
+    {
+    case norte:
+      printf("norte\n");
+      break;
+    case sul:
+      printf("sul\n");
+      break;
+    case leste:
+      printf("leste\n");
+      break;
+    case oeste:
+      printf("oeste\n");
+      break;
+    default:
+      printf("deu bosta\n");
+      break;
+    }
+
+    dijkstra(graph, index(i_atual, j_atual), GRAPH_SIZE - 1);
+
+    Stack s;
+
+    int proximo_vertice = GRAPH_SIZE - 1;
+    while (proximo_vertice != NO_PARENT)
+    {
+      s.push(proximo_vertice);
+      proximo_vertice = parents[proximo_vertice];
+    }
+
+    while (!s.isEmpty())
+    {
+      std::cout << s.topElement() << ", ";
+      s.pop();
+    }
+    std::cout << "\n";
+
+    printf("deseja virar para onde [0: esquerda, 1: frente, 2: direita]: ");
+    std::cin >> entrada;
+
+    direcao direcao_da_curva;
+    switch (entrada)
+    {
+    case 0:
+      direcao_da_curva = esquerda;
+      break;
+    case 1:
+      direcao_da_curva = frente;
+      break;
+    case 2:
+      direcao_da_curva = direita;
+      break;
+    default:
+      printf("deu bosta\n");
+      direcao_da_curva = frente;
+      break;
+    }
+
+    i_atual = novo_i(orientacao_atual, direcao_da_curva, i_atual);
+    j_atual = novo_j(orientacao_atual, direcao_da_curva, j_atual);
+    orientacao_atual = nova_orientacao(direcao_da_curva);
+  }
+}
+
+enum orientacao
+{
+  norte,
+  sul,
+  leste,
+  oeste
+};
+
+enum direcao
+{
+  esquerda,
+  frente,
+  direita
+};
+
+orientacao orientacao_atual = norte;
+
+int graph[GRAPH_SIZE][GRAPH_SIZE];
+
+int get_i(int n)
+{
+  return n % GRID_WIDTH;
+}
+
+int get_j(int n)
+{
+  return n / GRID_WIDTH;
+}
+
+int index(int i, int j)
+{
+  return j * GRID_WIDTH + i;
+}
+
+int novo_i(orientacao o, direcao d, int i)
+{
+  switch (o)
+  {
+  case norte:
+    switch (d)
+    {
+    case esquerda:
+      return i - 1;
+    case frente:
+      return i;
+    case direita:
+      return i + 1;
+    default:
+      printf("deu bosta");
+    }
+  case sul:
+    switch (d)
+    {
+    case esquerda:
+      return i + 1;
+    case frente:
+      return i;
+    case direita:
+      return i - 1;
+    default:
+      printf("deu bosta");
+    }
+  case leste:
+    switch (d)
+    {
+    case esquerda:
+      return i;
+    case frente:
+      return i + 1;
+    case direita:
+      return i;
+    default:
+      printf("deu bosta");
+    }
+  case oeste:
+    switch (d)
+    {
+    case esquerda:
+      return i;
+    case frente:
+      return i - 1;
+    case direita:
+      return i;
+    default:
+      printf("deu bosta");
+    }
+  default:
+    printf("deu bosta\n");
+  }
+}
+
+int novo_j(orientacao o, direcao d, int j)
+{
+  switch (o)
+  {
+  case norte:
+    switch (d)
+    {
+    case esquerda:
+      return j;
+    case frente:
+      return j + 1;
+    case direita:
+      return j;
+    default:
+      printf("deu bosta");
+    }
+  case sul:
+    switch (d)
+    {
+    case esquerda:
+      return j;
+    case frente:
+      return j - 1;
+    case direita:
+      return j;
+    default:
+      printf("deu bosta");
+    }
+  case leste:
+    switch (d)
+    {
+    case esquerda:
+      return j + 1;
+    case frente:
+      return j;
+    case direita:
+      return j - 1;
+    default:
+      printf("deu bosta");
+    }
+  case oeste:
+    switch (d)
+    {
+    case esquerda:
+      return j - 1;
+    case frente:
+      return j;
+    case direita:
+      return j + 1;
+    default:
+      printf("deu bosta");
+    }
+  default:
+    printf("deu bosta\n");
+  }
+}
+
+orientacao nova_orientacao(direcao d)
+{
+  switch (orientacao_atual)
+  {
+  case norte:
+    switch (d)
+    {
+    case esquerda:
+      return oeste;
+    case frente:
+      return norte;
+    case direita:
+      return leste;
+    default:
+      printf("deu bosta");
+    }
+  case sul:
+    switch (d)
+    {
+    case esquerda:
+      return leste;
+    case frente:
+      return sul;
+    case direita:
+      return oeste;
+    default:
+      printf("deu bosta");
+    }
+  case leste:
+    switch (d)
+    {
+    case esquerda:
+      return norte;
+    case frente:
+      return leste;
+    case direita:
+      return sul;
+    default:
+      printf("deu bosta");
+    }
+  case oeste:
+    switch (d)
+    {
+    case esquerda:
+      return sul;
+    case frente:
+      return oeste;
+    case direita:
+      return norte;
+    default:
+      printf("deu bosta");
+    }
+  default:
+    printf("deu bosta\n");
+  }
+}
+
+int main()
+{
+  for (int k = 0; k < GRAPH_SIZE; k++)
+  {
+    int i = get_i(k);
+    int j = get_j(k);
+
+    if (i > 0)
+    {
+      graph[k][index(i - 1, j)] = 1;
+    }
+    else
+    {
+      graph[k][index(i - 1, j)] = 0;
+    }
+
+    if (i < GRID_WIDTH - 1)
+    {
+      graph[k][index(i + 1, j)] = 1;
+    }
+    else
+    {
+      graph[k][index(i + 1, j)] = 0;
+    }
+
+    if (j > 0)
+    {
+      graph[k][index(i, j - 1)] = 1;
+    }
+    else
+    {
+      graph[k][index(i, j - 1)] = 0;
+    }
+
+    if (j < GRID_HEIGHT - 1)
+    {
+      graph[k][index(i, j + 1)] = 1;
+    }
+    else
+    {
+      graph[k][index(i, j + 1)] = 0;
+    }
+  }
+
+  for (int i = 0; i < GRAPH_SIZE; i++)
+  {
+    for (int j = 0; j < GRAPH_SIZE; j++)
+    {
+      if (graph[i][j] == 1)
+      {
+        printf("(%d, %d)\n", i, j);
+      }
+    }
+  }
+
+  graph[0][1] = 1;
+  graph[1][0] = 1;
+  // graph[0][3] = 1;
+  // graph[3][0] = 1;
+  // graph[3][4] = 1;
+  // graph[4][3] = 1;
+  // graph[1][2] = 1;
+  // graph[2][1] = 1;
+  // graph[2][5] = 1;
+  // graph[5][2] = 1;
+  // graph[5][8] = 1;
+  // graph[8][5] = 1;
 
   int entrada = 0;
   while (1)
@@ -528,25 +935,8 @@ void vira_esquerda();
 void vira_direita();
 void vira_180();
 
-#define GRID_WIDTH 2
-#define GRID_HEIGHT 4
-
-struct vertex
-{
-  int id;
-  vertex *adj[4];
-};
-
-vertex graph[GRID_WIDTH * GRID_HEIGHT] = {0};
-
 void setup()
 {
-  for (int i = 0; i < GRID_HEIGHT * GRID_WIDTH; i++)
-  {
-    graph[i].id = i;
-    graph[i].adj[]
-  }
-
   Serial.begin(115200);
   Wire.begin();
 
