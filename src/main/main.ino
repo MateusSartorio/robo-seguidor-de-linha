@@ -44,9 +44,9 @@ MPU6050 mpu(Wire);
 Servo sg90;
 
 // Constantes usadas para fazer o controle PWM de velocidade dos motores
-const int BASE_VEL = 170;
-const int SLOW_VEL = 160;
-const int DELTA_VEL = 20;
+const int BASE_VEL = 200;
+const int SLOW_VEL = 180;
+const int DELTA_VEL = 40;
 
 // Quandos os sensores IR da frente encontram um cruzamento, o robo entra no modo slow, ate que os sensores de cruzamento encontrem a linha
 bool slow = false;
