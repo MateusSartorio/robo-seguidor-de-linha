@@ -2,15 +2,16 @@
 #include <Wire.h>
 #include <ESP32Servo.h>
 
-#define INT_MAX 2147483647
-
 #define GRID_WIDTH 3
-#define GRID_HEIGHT 3
+#define GRID_HEIGHT 5
 
-int i_atual = 0;
-int j_atual = 0;
+bool fez_caminho_uma_vez = false;
+int i_inicial = 0;
+int j_inicial = 0;
 int i_saida = GRID_WIDTH - 1;
 int j_saida = GRID_HEIGHT - 1;
+int i_atual = i_inicial;
+int j_atual = j_inicial;
 const int GRAPH_SIZE = GRID_WIDTH * GRID_HEIGHT;
 
 int NO_PARENT = -1;
@@ -234,8 +235,11 @@ int obtem_nova_orientacao(int d)
       return norte;
     case direita:
       return leste;
+    case tras:
+      return sul;
     default:
-      printf("deu bosta");
+      Serial.printf("deu bosta norte\n");
+      return -1;
     }
   case sul:
     switch (d)
@@ -246,8 +250,11 @@ int obtem_nova_orientacao(int d)
       return sul;
     case direita:
       return oeste;
+    case tras:
+      return norte;
     default:
-      printf("deu bosta");
+      Serial.printf("deu bosta sul\n");
+      return -1;
     }
   case leste:
     switch (d)
@@ -258,8 +265,11 @@ int obtem_nova_orientacao(int d)
       return leste;
     case direita:
       return sul;
+    case tras:
+      return oeste;
     default:
-      printf("deu bosta");
+      Serial.printf("deu bosta oeste\n");
+      return -1;
     }
   case oeste:
     switch (d)
@@ -270,11 +280,15 @@ int obtem_nova_orientacao(int d)
       return oeste;
     case direita:
       return norte;
+    case tras:
+      return leste;
     default:
-      printf("deu bosta");
+      Serial.printf("deu bosta default\n");
+      return -1;
     }
   default:
-    printf("deu bosta\n");
+    Serial.printf("deu bosta\n");
+    return -1;
   }
 }
 
@@ -320,6 +334,7 @@ int obtem_vertice_a_esquerda()
     }
   default:
     Serial.printf("Problema em algum switch\n");
+    return -1;
   }
 }
 
@@ -365,6 +380,7 @@ int obtem_vertice_em_frente()
     }
   default:
     Serial.printf("Problema em algum switch\n");
+    return -1;
   }
 }
 
@@ -410,6 +426,7 @@ int obtem_vertice_a_direita()
     }
   default:
     Serial.printf("Problema em algum switch\n");
+    return -1;
   }
 }
 
@@ -490,6 +507,7 @@ int obtem_direcao_de_curva(int proximo_vertice_a_andar)
     }
   default:
     Serial.printf("Problema em algum switch\n");
+    return -1;
   }
 }
 
@@ -534,9 +552,9 @@ MPU6050 mpu(Wire);
 // Objeto usado para controlar o servo motor
 Servo sg90;
 // Constantes usadas para fazer o controle PWM de velocidade dos motores
-const int BASE_VEL = 170;
-const int SLOW_VEL = 160;
-const int DELTA_VEL = 20;
+const int BASE_VEL = 200;
+const int SLOW_VEL = 180;
+const int DELTA_VEL = 40;
 
 // Quandos os sensores IR da frente encontram um cruzamento, o robo entra no modo slow, ate que os sensores de cruzamento encontrem a linha
 bool slow = false;
@@ -644,6 +662,8 @@ void setup()
       graph[k][index(i, j + 1)] = 0;
     }
   }
+
+  dijkstra(graph, menor_caminho, index(i_atual, j_atual), index(i_saida, j_saida));
 }
 
 void loop()
@@ -667,12 +687,31 @@ void loop()
   if ((inputSLC > 2000 && inputSRC > 2000) && (millis() - ultima_curva > 1000))
   {
     slow = false;
+
+  if (index(i_atual, j_atual) == index(i_saida, j_saida))
+  {
+    Serial.printf("parou\n");
+
+    ledcWrite(PWM1_Ch, 127);
+    ledcWrite(PWM2_Ch, 127);
+    
+    fez_caminho_uma_vez = true;
+    i_atual = i_inicial;
+    j_atual = j_inicial;
+    orientacao_atual = norte;
+
+    dijkstra(graph, menor_caminho, index(i_atual, j_atual), index(i_saida, j_saida)); 
+
+    delay(15000);
+  }
+  else {
     processa_cruzamento();
+  }
   }
   else
   {
-    int deltaL = (int)(((float)inputL / 4000.0) * DELTA_VEL);
-    int deltaR = (int)(((float)inputR / 4000.0) * DELTA_VEL);
+    int deltaL = (int)(((double)inputL / 4000.0) * DELTA_VEL);
+    int deltaR = (int)(((double)inputR / 4000.0) * DELTA_VEL);
 
     int pwmL = 0;
     int pwmR = 0;
@@ -702,7 +741,7 @@ void loop()
  */
 void processa_cruzamento()
 {
-  float distancias[3] = {0};
+  double distancias[3] = {0};
 
   // motor esquerdo (invertido)
   ledcWrite(PWM1_Ch, 127);
@@ -729,8 +768,10 @@ void processa_cruzamento()
   sg90.write(80);
   delay(100);
 
+  Serial.printf("\ne: %lf, f: %lf, d: %lf\n", distancias[0], distancias[1], distancias[2]);
+
   bool caminho_alterado = false;
-  if (distancias[0] > DISTANCIA_OBSTACULO)
+  if (distancias[0] < DISTANCIA_OBSTACULO)
   {
     caminho_alterado = true;
     int vertice_a_esquerda = obtem_vertice_a_esquerda();
@@ -738,10 +779,12 @@ void processa_cruzamento()
     {
       graph[index(i_atual, j_atual)][vertice_a_esquerda] = 0;
       graph[vertice_a_esquerda][index(i_atual, j_atual)] = 0;
+      Serial.printf("Encontrou vertice %d a esquerda, recalculando caminho\n", vertice_a_esquerda);
     }
+
   }
 
-  if (distancias[1] > DISTANCIA_OBSTACULO)
+  if (distancias[1] < DISTANCIA_OBSTACULO)
   {
     caminho_alterado = true;
     int vertice_em_frente = obtem_vertice_em_frente();
@@ -749,10 +792,11 @@ void processa_cruzamento()
     {
       graph[index(i_atual, j_atual)][vertice_em_frente] = 0;
       graph[vertice_em_frente][index(i_atual, j_atual)] = 0;
+      Serial.printf("Encontrou vertice %d em frente, recalculando caminho\n", vertice_em_frente);
     }
   }
 
-  if (distancias[2] > DISTANCIA_OBSTACULO)
+  if (distancias[2] < DISTANCIA_OBSTACULO)
   {
     caminho_alterado = true;
     int vertice_a_direita = obtem_vertice_a_direita();
@@ -760,15 +804,38 @@ void processa_cruzamento()
     {
       graph[index(i_atual, j_atual)][vertice_a_direita] = 0;
       graph[vertice_a_direita][index(i_atual, j_atual)] = 0;
+      Serial.printf("Encontrou vertice %d a direita, recalculando caminho\n", vertice_a_direita);
     }
   }
 
-  if (caminho_alterado)
+  if (caminho_alterado && !fez_caminho_uma_vez)
   {
     dijkstra(graph, menor_caminho, index(i_atual, j_atual), index(i_saida, j_saida));
+    caminho_alterado = false;
   }
 
+  Serial.printf("Orientacao atual: ");
+  switch(orientacao_atual) {
+    case norte:
+      Serial.printf("norte");
+      break;
+    case sul:
+      Serial.printf("sul");
+      break;
+    case leste:
+      Serial.printf("leste");
+      break;
+    case oeste:
+      Serial.printf("oeste");
+      break;
+    default:
+      Serial.printf(", Orientacao invalida");
+  }
+
+  Serial.printf("vertice atual: %d\n", index(i_atual, j_atual));
+
   int proximo_vertice_a_andar = menor_caminho.topElement();
+  Serial.printf("Desempilhou: %d\n", proximo_vertice_a_andar);
   menor_caminho.pop();
 
   int direcao_da_curva = obtem_direcao_de_curva(proximo_vertice_a_andar);
@@ -776,36 +843,33 @@ void processa_cruzamento()
   switch (direcao_da_curva)
   {
   case esquerda:
+    Serial.printf("Andou para a esquerda\n");
     vira_esquerda();
     break;
   case frente:
+    Serial.printf("Andou frente\n");
     anda_reto();
     break;
   case direita:
+    Serial.printf("Andou para a direita\n");
     vira_direita();
     break;
   case tras:
+    Serial.printf("Andou para tras\n");
     vira_180();
     break;
   default:
     Serial.printf("Problema em algum switch\n");
   }
 
+  ledcWrite(PWM1_Ch, 127);
+  ledcWrite(PWM2_Ch, 127);
+
   i_atual = get_i(proximo_vertice_a_andar);
   j_atual = get_j(proximo_vertice_a_andar);
 
   orientacao_atual = obtem_nova_orientacao(direcao_da_curva);
-
-  ledcWrite(PWM1_Ch, 127);
-  ledcWrite(PWM2_Ch, 127);
-
-  if (menor_caminho.isEmpty())
-  {
-    while (1)
-    {
-    }
-  }
-
+  
   delay(1000);
 
   // Armazena o valor de tempo desde que terminou de fazer a curva
@@ -898,10 +962,10 @@ void vira_180()
 
 /**
  * @brief le a distancia de objetos em relacao ao sensor ultrasom
- * @return float
+ * @return double
  * @retval distancia em cm
  */
-float le_distancia()
+double le_distancia()
 {
   long durations[QTD_MEDIDAS_ULTRASOM] = {0};
 
@@ -929,7 +993,7 @@ float le_distancia()
   double media = (double)soma / (double)QTD_MEDIDAS_ULTRASOM;
 
   // Calcula a distancia em cm a partir do tempo
-  float distanceCm = media * SOUND_SPEED / 2.0;
+  double distanceCm = media * SOUND_SPEED / 2.0;
 
   return distanceCm;
 }
