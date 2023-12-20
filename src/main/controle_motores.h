@@ -2,6 +2,7 @@
 
 #include <MPU6050_light.h>
 
+// Constantes usadas para fazer o controle PWM de velocidade dos motores
 #define BASE_VEL 200
 #define SLOW_VEL 180
 #define DELTA_VEL 40

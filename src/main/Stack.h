@@ -8,10 +8,11 @@ private:
   int top;
 
 public:
+  // Initializa topo com -1 para indicar uma pilha vazia
   Stack()
   {
     top = -1;
-  } // Initialize top to -1 to indicate an empty stack
+  }
 
   bool isEmpty()
   {
@@ -41,6 +42,7 @@ public:
     }
   }
 
+  // Retorna -1 caso a pilha esteja vazia
   int topElement()
   {
     if (!isEmpty())
@@ -49,10 +51,11 @@ public:
     }
     else
     {
-      return -1; // In this example, we consider -1 as an invalid value.
+      return -1;
     }
   }
 
+  // Limpa a pilha
   void clear()
   {
     while (!isEmpty())
