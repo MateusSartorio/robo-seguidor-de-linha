@@ -1,7 +1,8 @@
 # robo-seguidor-de-linha
 Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espírito Santo.
 
-![robot](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/c52671f4-254f-4aa5-aa03-0f046b460c1d)
+![robot](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/72749fd0-925d-4d86-a08f-0f7dff8bf461)
+
 
 ![maze](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/48775a13-bf59-4582-90c3-cd2be983f361)
 
