@@ -171,8 +171,7 @@ void loop()
 }
 
 /**
- * @brief toma decisoes ao encontrar cruzamento
- * @return void
+ * @brief Toma decisoes ao encontrar cruzamento
  */
 void processa_cruzamento()
 {
@@ -258,8 +257,7 @@ void processa_cruzamento()
 }
 
 /**
- * @brief mede a distancias aos obstaculos da esquerda, frente e direita, nesta ordem
- * @return void
+ * @brief Mede a distancias aos obstaculos da esquerda, frente e direita, nesta ordem
  */
 void mede_distancias(double distancias[])
 {
