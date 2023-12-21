@@ -1,5 +1,10 @@
 #pragma once
 
+/**
+ * @brief Classe Stack implementa estrutura de dados do tipo pilha para inteiros positivos
+ *
+ * @tparam STACK_MAX_SIZE
+ */
 template <int STACK_MAX_SIZE>
 class Stack
 {
@@ -8,22 +13,40 @@ private:
   int top;
 
 public:
-  // Initializa topo com -1 para indicar uma pilha vazia
+  /**
+   * @brief Constroi um novo objeto da classe Stack
+   *
+   */
   Stack()
   {
     top = -1;
   }
 
+  /**
+   * @brief Retorna true caso a pilha esteja vazia
+   *
+   * @return bool
+   */
   bool isEmpty()
   {
     return (top == -1);
   }
 
+  /**
+   * @brief Retorna true caso a pilha esteja cheia
+   *
+   * @return bool
+   */
   bool isFull()
   {
     return (top == STACK_MAX_SIZE - 1);
   }
 
+  /**
+   * @brief Insere elemento no top
+   *
+   * @param element
+   */
   void push(int element)
   {
     if (!isFull())
@@ -33,6 +56,9 @@ public:
     }
   }
 
+  /**
+   * @brief Remove elemento do top
+   */
   void pop()
   {
     if (!isEmpty())
@@ -42,7 +68,11 @@ public:
     }
   }
 
-  // Retorna -1 caso a pilha esteja vazia
+  /**
+   * @brief Retorna elemento no topo da pilha
+   *
+   * @return int
+   */
   int topElement()
   {
     if (!isEmpty())
@@ -55,7 +85,9 @@ public:
     }
   }
 
-  // Limpa a pilha
+  /**
+   * @brief Limpa a pilha
+   */
   void clear()
   {
     while (!isEmpty())
