@@ -1,7 +1,7 @@
 # robo-seguidor-de-linha
 Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espírito Santo.
 
-## Vídeo demonstrativo em [YouTube](https://youtu.be/42od_47x8S8).
+## Vídeo demonstrativo no [YouTube](https://youtu.be/42od_47x8S8).
 
 ## O Robô
 ![robot](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/72749fd0-925d-4d86-a08f-0f7dff8bf461)
