@@ -1,6 +1,6 @@
 #pragma once
 
-template<int STACK_MAX_SIZE>
+template <int STACK_MAX_SIZE>
 class Stack
 {
 private:

@@ -305,7 +305,8 @@ int obtem_direcao_de_curva(int orientacao_atual, int i_atual, int j_atual, int p
   }
 }
 
-void inicializa_grafo(int graph[GRAPH_SIZE][GRAPH_SIZE]) {
+void inicializa_grafo(int graph[GRAPH_SIZE][GRAPH_SIZE])
+{
   for (int k = 0; k < GRAPH_SIZE; k++)
   {
     int i = get_i(k);
@@ -348,7 +349,6 @@ void inicializa_grafo(int graph[GRAPH_SIZE][GRAPH_SIZE]) {
     }
   }
 }
-
 
 // Function to print shortest path
 // from source to currentVertex

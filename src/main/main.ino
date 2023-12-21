@@ -42,7 +42,6 @@ Servo sg90;
 // Quandos os sensores IR da frente encontram um cruzamento, o robo entra no modo slow, ate que os sensores de cruzamento encontrem a linha
 bool slow = false;
 
-
 // Armazena o valor de tempo dede a ultima curva feita pelo robo
 // Apos o robo fazer uma curva em um cruzamento, ele conta 1000 ms ate que possa detectar outro cruzamento
 // Isso evita que o robo continue detectando que encontrou um cruzamento apos fazer uma curva
@@ -71,7 +70,7 @@ void setup()
   // Descomente essa linha se o MPU6050 esta montado de cabeca para baixo
   // mpu.upsideDownMounting = true;
 
-   // calcula offsets do giroscopio e acelerometro
+  // calcula offsets do giroscopio e acelerometro
   mpu.calcOffsets();
   Serial.println("Pronto!\n");
 
@@ -144,25 +143,26 @@ void loop()
   {
     slow = false;
 
-  if (index(i_atual, j_atual) == index(i_saida, j_saida))
-  {
-    Serial.printf("Chegou ao final do percurso\n");
+    if (index(i_atual, j_atual) == index(i_saida, j_saida))
+    {
+      Serial.printf("Chegou ao final do percurso\n");
 
-    ledcWrite(PWM1_Ch, 127);
-    ledcWrite(PWM2_Ch, 127);
-    
-    fez_caminho_uma_vez = true;
-    i_atual = i_inicial;
-    j_atual = j_inicial;
-    orientacao_atual = norte;
+      ledcWrite(PWM1_Ch, 127);
+      ledcWrite(PWM2_Ch, 127);
 
-    dijkstra(graph, parents, menor_caminho, index(i_atual, j_atual), index(i_saida, j_saida)); 
+      fez_caminho_uma_vez = true;
+      i_atual = i_inicial;
+      j_atual = j_inicial;
+      orientacao_atual = norte;
 
-    delay(20000);
-  }
-  else {
-    processa_cruzamento();
-  }
+      dijkstra(graph, parents, menor_caminho, index(i_atual, j_atual), index(i_saida, j_saida));
+
+      delay(20000);
+    }
+    else
+    {
+      processa_cruzamento();
+    }
   }
   else
   {
@@ -177,7 +177,7 @@ void loop()
 void processa_cruzamento()
 {
   double distancias[3] = {0};
-  mede_distancias(distancias); 
+  mede_distancias(distancias);
 
   // Caso algum objeto seja identificado em alguma direcao, a aresta equivalente eh retirada do grafo e o algoritimo de Dijkstra eh executado novamente
   bool caminho_alterado = false;
@@ -250,7 +250,7 @@ void processa_cruzamento()
   j_atual = get_j(proximo_vertice_a_andar);
 
   orientacao_atual = obtem_nova_orientacao(orientacao_atual, direcao_da_curva);
-  
+
   delay(1000);
 
   // Armazena o valor de tempo desde que terminou de fazer a curva
@@ -261,7 +261,8 @@ void processa_cruzamento()
  * @brief mede a distancias aos obstaculos da esquerda, frente e direita, nesta ordem
  * @return void
  */
-void mede_distancias(double distancias[]) {
+void mede_distancias(double distancias[])
+{
   // motor esquerdo (invertido)
   ledcWrite(PWM1_Ch, 127);
   ledcWrite(PWM2_Ch, 127);
