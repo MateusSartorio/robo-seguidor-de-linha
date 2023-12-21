@@ -16,7 +16,7 @@ Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espír
 ## Estrutura do robô
 ![estrutura_do_robo](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/1db27bba-5684-4c7f-9526-077784c4664b)
 
-## Esquemática
+## Esquemático
 ![esquematico](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/f67462cf-89a0-449b-9f9b-c26d680aee70)
 
 ## Licença:
