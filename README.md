@@ -11,24 +11,19 @@ Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espír
 ![robot](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/72749fd0-925d-4d86-a08f-0f7dff8bf461)
 
 ## O Labirinto
-![WhatsApp Image 2023-12-19 at 3 01 59 PM](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/2c11934c-82dd-4713-8143-908e6f4abb90)
+![labirinto](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/2c11934c-82dd-4713-8143-908e6f4abb90)
+
+![esquematico](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/f67462cf-89a0-449b-9f9b-c26d680aee70)
 
 ## Licença:
 
 Copyright Universidade Federal do Espirito Santo (Ufes)
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 This program is released under license GNU GPL v3+ license.
 
