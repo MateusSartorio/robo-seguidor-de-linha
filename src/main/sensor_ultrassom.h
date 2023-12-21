@@ -5,7 +5,7 @@
 #define SOUND_SPEED 0.034
 
 /**
- * @brief le a distancia de objetos em relacao ao sensor ultrasom
+ * @brief Le a distancia de objetos em relacao ao sensor ultrasom
  * @return double
  * @retval distancia em cm
  */
