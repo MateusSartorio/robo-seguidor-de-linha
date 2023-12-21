@@ -13,6 +13,10 @@ Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espír
 ## O Labirinto
 ![labirinto](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/2c11934c-82dd-4713-8143-908e6f4abb90)
 
+## Estrutura do robô
+![estrutura_do_robo](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/1db27bba-5684-4c7f-9526-077784c4664b)
+
+## Esquemática
 ![esquematico](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/f67462cf-89a0-449b-9f9b-c26d680aee70)
 
 ## Licença:
