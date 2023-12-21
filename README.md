@@ -2,6 +2,8 @@
 Robô seguidor de linha com a habilidade específica de navegar e solucionar labirintos.
 Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espírito Santo.
 
+[![Video](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/72749fd0-925d-4d86-a08f-0f7dff8bf461)]([https://www.youtube.com/watch?v=jXnoFqcAkQA](https://www.youtube.com/watch?v=42od_47x8S8))
+
 ## Vídeo demonstrativo no [YouTube](https://youtu.be/42od_47x8S8).
 
 ## O Robô
