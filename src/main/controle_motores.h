@@ -8,8 +8,7 @@
 #define DELTA_VEL 40
 
 /**
- * @brief o robo anda reto no cruzamento
- * @return void
+ * @brief O robo anda reto no cruzamento
  */
 void anda_reto(MPU6050 &mpu)
 {
@@ -17,7 +16,7 @@ void anda_reto(MPU6050 &mpu)
 }
 
 /**
- * @brief vira o robo para direita
+ * @brief Vira o robo para direita
  * @return void
  */
 void vira_direita(MPU6050 &mpu)
@@ -42,8 +41,7 @@ void vira_direita(MPU6050 &mpu)
 }
 
 /**
- * @brief vira o robo para esquerda
- * @return void
+ * @brief Vira o robo para esquerda
  */
 void vira_esquerda(MPU6050 &mpu)
 {
@@ -67,8 +65,7 @@ void vira_esquerda(MPU6050 &mpu)
 }
 
 /**
- * @brief vira o robo em 180º
- * @return void
+ * @brief Vira o robo em 180º
  */
 void vira_180(MPU6050 &mpu)
 {
@@ -91,6 +88,13 @@ void vira_180(MPU6050 &mpu)
   }
 }
 
+/**
+ * @brief Faz o controle proporcional do robo para que o robo siga a linha
+ *
+ * @param inputL
+ * @param inputR
+ * @param slow
+ */
 void segue_linha(int inputL, int inputR, bool &slow)
 {
   int deltaL = (int)(((double)inputL / 4000.0) * DELTA_VEL);
