@@ -1,5 +1,4 @@
 # robo-seguidor-de-linha
-Robô seguidor de linha.
 Trabalho da disciplina de Sistemas Embarcados 1 - Universidade federal do Espírito Santo.
 
 Segue link no YouTube:
