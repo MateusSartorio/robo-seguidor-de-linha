@@ -10,21 +10,47 @@
 #define GRID_HEIGHT 5
 const int GRAPH_SIZE = GRID_WIDTH * GRID_HEIGHT;
 
+/**
+ * @brief Retorna a cordenada i (horizontal) para um vertice de indice n
+ *
+ * @param n
+ * @return int
+ */
 int get_i(int n)
 {
   return n % GRID_WIDTH;
 }
 
+/**
+ * @brief Retorna a cordenada j (vertical) para um vertice de indice n
+ *
+ * @param n
+ * @return int
+ */
 int get_j(int n)
 {
   return n / GRID_WIDTH;
 }
 
+/**
+ * @brief Retorna o indice n de um objeto com cordenadas (i, j)
+ *
+ * @param i
+ * @param j
+ * @return int
+ */
 int index(int i, int j)
 {
   return j * GRID_WIDTH + i;
 }
 
+/**
+ * @brief Obtem nova orientacao do robo com base na orientacao atual e no sentido para o qual ele esta virando
+ *
+ * @param orientacao_atual
+ * @param direcao_da_curva
+ * @return int
+ */
 int obtem_nova_orientacao(int orientacao_atual, int direcao_da_curva)
 {
   switch (orientacao_atual)
@@ -90,6 +116,14 @@ int obtem_nova_orientacao(int orientacao_atual, int direcao_da_curva)
   }
 }
 
+/**
+ * @brief Obtem o vertice a esquerda do robo com base na sua orientacao e posicao no grid (grafo)
+ *
+ * @param orientacao_atual
+ * @param i_atual
+ * @param j_atual
+ * @return int
+ */
 int obtem_vertice_a_esquerda(int orientacao_atual, int i_atual, int j_atual)
 {
   switch (orientacao_atual)
@@ -135,6 +169,14 @@ int obtem_vertice_a_esquerda(int orientacao_atual, int i_atual, int j_atual)
   }
 }
 
+/**
+ * @brief Obtem o vertice em frente ao robo com base na sua orientacao e posicao no grid (grafo)
+ *
+ * @param orientacao_atual
+ * @param i_atual
+ * @param j_atual
+ * @return int
+ */
 int obtem_vertice_em_frente(int orientacao_atual, int i_atual, int j_atual)
 {
   switch (orientacao_atual)
@@ -180,6 +222,14 @@ int obtem_vertice_em_frente(int orientacao_atual, int i_atual, int j_atual)
   }
 }
 
+/**
+ * @brief Obtem o vertice a direita do robo com base na sua orientacao e posicao no grid (grafo)
+ *
+ * @param orientacao_atual
+ * @param i_atual
+ * @param j_atual
+ * @return int
+ */
 int obtem_vertice_a_direita(int orientacao_atual, int i_atual, int j_atual)
 {
   switch (orientacao_atual)
@@ -225,6 +275,15 @@ int obtem_vertice_a_direita(int orientacao_atual, int i_atual, int j_atual)
   }
 }
 
+/**
+ * @brief Obtem para qual direcao o robo tem que virar baseado na sua posicao no grid, na sua orientacao atual e para qual vertice ele quer ir
+ *
+ * @param orientacao_atual
+ * @param i_atual
+ * @param j_atual
+ * @param proximo_vertice_a_andar
+ * @return int
+ */
 int obtem_direcao_de_curva(int orientacao_atual, int i_atual, int j_atual, int proximo_vertice_a_andar)
 {
   int i_proximo_vertice = get_i(proximo_vertice_a_andar);
@@ -305,6 +364,11 @@ int obtem_direcao_de_curva(int orientacao_atual, int i_atual, int j_atual, int p
   }
 }
 
+/**
+ * @brief Inicializa o grafo supondo que todos as os vertices adjacentes no grid estao conectados (supoem nao existem obstaculos)
+ *
+ * @param graph
+ */
 void inicializa_grafo(int graph[GRAPH_SIZE][GRAPH_SIZE])
 {
   for (int k = 0; k < GRAPH_SIZE; k++)
@@ -350,9 +414,13 @@ void inicializa_grafo(int graph[GRAPH_SIZE][GRAPH_SIZE])
   }
 }
 
-// Function to print shortest path
-// from source to currentVertex
-// using parents array
+/**
+ * @brief Retorna o proximo vertice na arvore de caminho minimo gerada pelo algoritimo de Dijkstra
+ *
+ * @param currentVertex
+ * @param parents
+ * @return int
+ */
 int next_vertex(int currentVertex, int parents[])
 {
   // Base case : Source node has
@@ -365,6 +433,16 @@ int next_vertex(int currentVertex, int parents[])
   return parents[currentVertex];
 }
 
+/**
+ * @brief Algoritimo de Dijkstra. O menor caminho encontrado eh empilhado em menor_caminho
+ *
+ * @tparam GRAPH_SIZE
+ * @param adjacencyMatrix
+ * @param parents
+ * @param menor_caminho
+ * @param startVertex
+ * @param destinationVertex
+ */
 template <int GRAPH_SIZE>
 void dijkstra(int adjacencyMatrix[GRAPH_SIZE][GRAPH_SIZE], int parents[], Stack<GRAPH_SIZE> &menor_caminho, int startVertex, int destinationVertex)
 {
