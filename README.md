@@ -1,6 +1,8 @@
 # robo-seguidor-de-linha
 Robô seguidor de linha com a habilidade específica de navegar e solucionar labirintos.
 
+O projeto buscou integrar os aprendizados teóricos e práticos adquiridos ao longo do curso para implementar um robô capaz de seguir uma trajetória delineada por uma linha, utilizando sensores e algoritmos para navegação autônoma, de forma que fosse capaz de orientar-se e encontrar a saída em um labirinto.
+
 Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espírito Santo.
 
 ## Vídeo demonstrativo no [YouTube](https://youtu.be/42od_47x8S8).
