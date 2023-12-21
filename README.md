@@ -2,7 +2,7 @@
 Robô seguidor de linha com a habilidade específica de navegar e solucionar labirintos.
 Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espírito Santo.
 
-[![Video](https://img.youtube.com/vi/jXnoFqcAkQA/maxresdefault.jpg)](https://www.youtube.com/watch?v=jXnoFqcAkQA)
+[!Video]((https://www.youtube.com/watch?v=42od_47x8S8/maxresdefault.jpg)](https://www.youtube.com/watch?v=42od_47x8S8)
 
 ## Vídeo demonstrativo no [YouTube](https://youtu.be/42od_47x8S8).
 
