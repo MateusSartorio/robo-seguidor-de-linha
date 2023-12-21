@@ -10,18 +10,22 @@ Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espír
 
 ## O Robô
 Abaixo é mostrado o robô utilizado para implementar o algorítimo proposto para solução do labirinto.
+
 ![robot](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/72749fd0-925d-4d86-a08f-0f7dff8bf461)
 
 ## O Labirinto
 O labirinto consiste de linhas pretas formando um grid, com obstáculos bloqueando alguns dos caminhos.
+
 ![labirinto](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/2c11934c-82dd-4713-8143-908e6f4abb90)
 
 ## Estrutura do robô
 A figura abaixo apresenta a estrutura principal do robô. Ele conta com uma tração diferencial (motor esquerdo e direito, ME e MD, respetivamente), uma roda boba de suporte, e de 3 a 5 sensores de linha (sensores de linha esquerdo, direito e de cruzamento esquerdo, SLE, SLD e SCE, respetivamente, podendo acrescentar sensor de linha central e de cruzamento direito).
+
 ![estrutura_do_robo](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/1db27bba-5684-4c7f-9526-077784c4664b)
 
 ## Esquemático
 A organização dos componentes utilizados está disposta na figura abaixo, que representa o esquemático do robô.
+
 ![esquematico](https://github.com/MateusSartorio/robo-seguidor-de-linha/assets/69646100/f67462cf-89a0-449b-9f9b-c26d680aee70)
 
 ## Licença:
