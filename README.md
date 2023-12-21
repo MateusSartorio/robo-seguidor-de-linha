@@ -1,7 +1,7 @@
 # robo-seguidor-de-linha
 Robô seguidor de linha com a habilidade específica de navegar e solucionar labirintos.
 
-O projeto buscou integrar os aprendizados teóricos e práticos adquiridos ao longo do curso para implementar um robô capaz de seguir uma trajetória delineada por uma linha, utilizando sensores e algoritmos para navegação autônoma, de forma que fosse capaz de orientar-se e encontrar a saída em um labirinto.
+O projeto buscou integrar os aprendizados teóricos e práticos adquiridos ao longo do curso para implementar um robô capaz de seguir uma trajetória delineada por linhas pretas, utilizando sensores e algoritmos para navegação autônoma, de forma que fosse capaz de orientar-se e encontrar a saída em um labirinto.
 O algorítmo proposto para encontrar a saída do labirinto basea-se no algoritmo de Dijkstra, onde o robô pressupõem que não existe nenhum obstáculo no labirinto, e a medida que ele vai encontrando os obstáculos, ele ajustanda a rota de forma a encontrar o menor caminho possível para a saída com as informações que ele tem sobre o labirinto até o momento.
 
 Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espírito Santo.
