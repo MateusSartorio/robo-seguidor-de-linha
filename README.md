@@ -1,5 +1,5 @@
 # robo-seguidor-de-linha
-Robô seguidor de linha com a habilidade específica de navegar e solucionar labirintos.
+Robô seguidor de linha com a habilidade específica de navegar e solucionar labirintos. (`<br>`)
 Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espírito Santo.
 
 ## Vídeo demonstrativo no [YouTube](https://youtu.be/42od_47x8S8).
