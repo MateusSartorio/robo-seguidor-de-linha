@@ -6,7 +6,7 @@ O solução proposta basea-se no algoritmo de Dijkstra, onde o robô pressupõem
 
 Trabalho da disciplina de Sistemas Embarcados I - Universidade federal do Espírito Santo.
 
-## Vídeo demonstrativo no [YouTube]([https://youtu.be/42od_47x8S8](https://www.youtube.com/watch?v=yrXToYqkv9w)).
+## Vídeo demonstrativo no [YouTube](https://www.youtube.com/watch?v=yrXToYqkv9w).
 
 ## O Robô
 Abaixo é mostrado o robô utilizado para implementar o algorítimo proposto para solução do labirinto.
